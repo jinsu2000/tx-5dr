@@ -1,0 +1,11 @@
+DeepCW / web-deep-cw-decoder attribution
+
+TX-5DR includes a CW decoding integration and packaged model files derived from or designed to interoperate with the web-deep-cw-decoder project.
+
+Original project: https://github.com/e04/web-deep-cw-decoder
+Demo site: https://cw.e04.workers.dev/
+Copyright: Copyright (C) 2026 e04
+License: GNU General Public License version 3 (GPL-3.0)
+
+A copy of the GPL-3.0 license for web-deep-cw-decoder is provided in:
+resources/licenses/deepcw/web-deep-cw-decoder-GPL-3.0-LICENSE
