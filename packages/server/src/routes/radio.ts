@@ -4,6 +4,11 @@
 /**
  * 电台控制API路由
  * 📊 Day14优化：统一错误处理，使用 RadioError + Fastify 全局错误处理器
+ *
+ * 多引擎支持：
+ * - 支持通过 engineId 查询参数指定引擎
+ * - 默认使用 "default" 引擎（向后兼容）
+ * - 路由前缀: /api/radio 或 /api/radio/:engineId
  */
 import { FastifyInstance } from 'fastify';
 import { readdir, readFile } from 'node:fs/promises';
@@ -11,6 +16,7 @@ import { createLogger } from '../utils/logger.js';
 
 const logger = createLogger('RadioRoute');
 import { DigitalRadioEngine } from '../DigitalRadioEngine.js';
+import { EngineManager } from '../EngineManager.js';
 import { ConfigManager } from '../config/config-manager.js';
 import { ProfileManager } from '../config/ProfileManager.js';
 import { HamlibConfigSchema, UserRole, WriteCapabilityPayloadSchema } from '@tx5dr/contracts';
@@ -461,6 +467,25 @@ function emitToneSquelchWarning(
 }
 
 export async function radioRoutes(fastify: FastifyInstance) {
+  // 多引擎支持：尝试从查询参数获取 engineId
+  // 默认使用 "default" 引擎（向后兼容）
+  const engineManager = EngineManager.getInstance();
+
+  // 辅助函数：从请求中获取引擎实例
+  const getEngine = (req: any): DigitalRadioEngine => {
+    const engineId = req.query?.engineId as string | undefined;
+    if (engineId) {
+      const engine = engineManager.getEngine(engineId);
+      if (engine) {
+        return engine;
+      }
+      // 如果指定的引擎不存在，抛出错误
+      throw new Error(`Engine "${engineId}" not found`);
+    }
+    // 默认使用向后兼容的引擎
+    return DigitalRadioEngine.getInstance();
+  };
+
   const engine = DigitalRadioEngine.getInstance();
   const configManager = ConfigManager.getInstance();
   const profileManager = ProfileManager.getInstance();
@@ -1258,5 +1283,12 @@ export async function radioRoutes(fastify: FastifyInstance) {
     await radioManager.writeCapability(id, body?.value, body?.action);
 
     return reply.send({ success: true });
+  });
+
+  // 虚拟频差快捷开关：热更新 + 持久化到激活 Profile
+  fastify.post('/fake-frequency', { preHandler: [requireAbility('execute', 'RadioControl')] }, async (req, reply) => {
+    const enabled = !!(req.body as { enabled?: boolean } | undefined)?.enabled;
+    await engine.setFakeFrequencyEnabled(enabled);
+    return reply.send({ success: true, enabled });
   });
 }

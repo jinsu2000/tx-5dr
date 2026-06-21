@@ -22,6 +22,7 @@ import { slotpackRoutes } from './routes/slotpack.js';
 import { modeRoutes } from './routes/mode.js';
 import { operatorRoutes } from './routes/operators.js';
 import { radioRoutes } from './routes/radio.js';
+import { engineRoutes } from './routes/engines.js';
 import { powerRoutes } from './routes/power.js';
 import { rigctldRoutes } from './routes/rigctld.js';
 import { settingsRoutes } from './routes/settings.js';
@@ -572,8 +573,9 @@ export async function createServer() {
   await fastify.register(profileRoutes, { prefix: '/api/profiles' });
   fastify.log.info('Profile routes registered');
 
-  // Admin 路由：音频、设置、存储、第三方服务
+  // Admin 路由：引擎管理、音频、设置、存储、第三方服务
   await registerRoleScope(fastify, UserRole.ADMIN, async (scope) => {
+    await scope.register(engineRoutes, { prefix: '/api/engines' });
     await scope.register(audioRoutes, { prefix: '/api/audio' });
     await scope.register(settingsRoutes, { prefix: '/api/settings' });
     const { storageRoutes } = await import('./routes/storage.js');
@@ -583,7 +585,7 @@ export async function createServer() {
     await scope.register(systemRoutes, { prefix: '/api/system' });
     await scope.register(openwebrxRoutes, { prefix: '/api/openwebrx' });
   });
-  fastify.log.info('Admin routes registered (audio, settings, storage, pskreporter, system, openwebrx)');
+  fastify.log.info('Admin routes registered (engines, audio, settings, storage, pskreporter, system, openwebrx)');
 
   // Viewer+ 路由：操作员（内部根据角色过滤）、电台状态、模式、时隙包、语音
   await registerRoleScope(fastify, UserRole.VIEWER, async (scope) => {
