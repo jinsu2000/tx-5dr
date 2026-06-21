@@ -205,6 +205,10 @@ export function makeDeepCWBackendDescriptor(options: DeepCWBackendDescriptorOpti
  */
 export class DigitalRadioEngine extends EventEmitter<DigitalRadioEngineEvents> {
   private static instance: DigitalRadioEngine | null = null;
+  private static defaultInstanceId = 'default';
+
+  /** 引擎实例 ID */
+  private _instanceId: string;
 
   // 底层组件
   private slotClock: SlotClock | null = null;
@@ -266,8 +270,9 @@ export class DigitalRadioEngine extends EventEmitter<DigitalRadioEngineEvents> {
     TARGET_SAMPLE_RATE: 6000
   };
 
-  private constructor() {
+  private constructor(instanceId?: string) {
     super();
+    this._instanceId = instanceId ?? DigitalRadioEngine.defaultInstanceId;
     this.clockSource = new ClockSourceSystem();
     this.ntpCalibrationService = new NtpCalibrationService(
       this.clockSource,
@@ -588,10 +593,26 @@ export class DigitalRadioEngine extends EventEmitter<DigitalRadioEngineEvents> {
   }
 
   static getInstance(): DigitalRadioEngine {
+    // 保持向后兼容：如果直接调用 getInstance()，返回默认引擎
+    // 新代码应该使用 EngineManager 来管理多引擎
     if (!DigitalRadioEngine.instance) {
-      DigitalRadioEngine.instance = new DigitalRadioEngine();
+      DigitalRadioEngine.instance = new DigitalRadioEngine(DigitalRadioEngine.defaultInstanceId);
     }
     return DigitalRadioEngine.instance;
+  }
+
+  /**
+   * 获取引擎实例 ID
+   */
+  public get instanceId(): string {
+    return this._instanceId;
+  }
+
+  /**
+   * 获取引擎显示名称（用于日志和调试）
+   */
+  public get displayName(): string {
+    return `Engine(${this.instanceId})`;
   }
 
   // ─── 公开访问器 ──────────────────────────────────
