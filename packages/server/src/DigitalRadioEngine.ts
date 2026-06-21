@@ -602,6 +602,14 @@ export class DigitalRadioEngine extends EventEmitter<DigitalRadioEngineEvents> {
   }
 
   /**
+   * 创建新的引擎实例（工厂方法）
+   * 用于 EngineManager 多引擎场景
+   */
+  static create(instanceId?: string): DigitalRadioEngine {
+    return new DigitalRadioEngine(instanceId);
+  }
+
+  /**
    * 获取引擎实例 ID
    */
   public get instanceId(): string {

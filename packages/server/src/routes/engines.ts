@@ -104,7 +104,7 @@ export async function engineRoutes(fastify: FastifyInstance) {
 
   // 启动引擎
   fastify.post('/:engineId/start', {
-    onRequest: requireAbility('start', 'Engine'),
+    onRequest: requireAbility('execute', 'Engine'),
   }, async (req: any, reply) => {
     const { engineId } = req.params;
 
@@ -135,7 +135,7 @@ export async function engineRoutes(fastify: FastifyInstance) {
 
   // 停止引擎
   fastify.post('/:engineId/stop', {
-    onRequest: requireAbility('stop', 'Engine'),
+    onRequest: requireAbility('execute', 'Engine'),
   }, async (req: any, reply) => {
     const { engineId } = req.params;
 

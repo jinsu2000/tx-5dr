@@ -86,8 +86,8 @@ export class EngineManager {
     // 动态导入避免循环依赖
     const { DigitalRadioEngine } = await import('./DigitalRadioEngine.js');
 
-    // 创建引擎实例（传入 instanceId）
-    const engine = new DigitalRadioEngine(engineId);
+    // 创建引擎实例（使用工厂方法）
+    const engine = DigitalRadioEngine.create(engineId);
 
     // 初始化引擎
     await engine.initialize();
@@ -147,7 +147,7 @@ export class EngineManager {
           engineId,
           radioConfig: instance.config.radioConfig,
           isRunning: instance.engine.getStatus().isRunning ?? false,
-          operatorIds: instance.engine.operatorManager.getAllOperators().map(op => op.id),
+          operatorIds: instance.engine.operatorManager.getAllOperators().map(op => op.config.id),
           createdAt: instance.createdAt,
         });
       } catch (error) {
